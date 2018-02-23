@@ -27,7 +27,7 @@
 	"cameras": [{
 	    "name": "Garage Camera",
 	    "videoConfig": {
-		"source": "-re -i rtsp://10.0.6.2:554/stream=0",
+		"source": "-re -i rtsp://admin:PUT_CAMERA_PASSWORD_HERE@PUT_CAMERA_IP_ADDRESS_HERE:554/stream=0",
 		"maxStreams": 2,
 		"maxWidth": 1280,
 		"maxHeight": 720,
