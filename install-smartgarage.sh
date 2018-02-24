@@ -274,18 +274,27 @@ function install_homebridge_camera_plugin() {
 function configure_homebridge() {
 	infopart 10 "Configuring Homebridge..."
 	if execute_step ; then
-		echo "mkdir /var/lib/homebridge"
-		mkdir /var/lib/homebridge
+		echo ""
+		if !([[ -d /var/lib/homebridge ]]) ; then
+			echo "mkdir /var/lib/homebridge"
+			mkdir /var/lib/homebridge
+		else
+			echo "/var/lib/homebridge already exists. Skipping mkdir."
+		fi
 
+		echo ""
 		echo "cp ${DIR}/homebridge /etc/default/"
 		cp ${DIR}/homebridge /etc/default/
 
+		echo ""
 		echo "cp ${DIR}/homebridge.service /etc/systemd/system/"
 		cp ${DIR}/homebridge.service /etc/systemd/system/
 
+		echo ""
 		echo "cp ${DIR}/garage-door-gpio /var/lib/homebridge/"
 		cp ${DIR}/garage-door-gpio /var/lib/homebridge/
 
+		echo ""
 		if [ ${SKIP_CAMERA} == "1" ]; then
 			echo "cp ${DIR}/config-without-camera.json /var/lib/homebridge/config.json"
 			cp ${DIR}/config-without-camera.json /var/lib/homebridge/config.json
@@ -293,27 +302,42 @@ function configure_homebridge() {
 			echo "cp ${DIR}/config-with-camera.json /var/lib/homebridge/config.json"
 			cp ${DIR}/config-with-camera.json /var/lib/homebridge/config.json
 
+			echo ""
 			echo "sed -i 's/CAMERA_PASSWORD/${CAMERA_PASSWORD}' /var/lib/homebridge/config.json"
 			sed -i 's/CAMERA_PASSWORD/${CAMERA_PASSWORD}' /var/lib/homebridge/config.json
 
+			echo ""
 			echo "sed -i 's/CAMERA_IP_ADDRESS/${CAMERA_IP_ADDRESS}' /var/lib/homebridge/config.json"
 			sed -i 's/CAMERA_IP_ADDRESS/${CAMERA_IP_ADDRESS}' /var/lib/homebridge/config.json
 		fi
 
-		echo "useradd -M --system homebridge"
-		useradd -M --system homebridge
+		echo ""
+		if [ id -u homebridge &>/dev/null ]; then
+			echo "useradd -M --system homebridge"
+			useradd -M --system homebridge
+		else
+			echo "homebridge user already exists. Skipping useradd."
+		fi
 
+		echo ""
 		echo "chmod -R 0777 /var/lib/homebridge"
 		chmod -R 0777 /var/lib/homebridge
 
+		echo ""
 		echo "systemctl daemon-reload"
 		systemctl daemon-reload
 
+		echo ""
 		echo "systemctl enable homebridge"
 		systemctl enable homebridge
 
+		echo ""
 		echo "systemctl start homebridge"
 		systemctl start homebridge
+
+		echo ""
+		echo "systemctl status homebridge"
+		systemctl status homebridge
 	fi
 }
 
