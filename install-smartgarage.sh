@@ -146,7 +146,7 @@ function configure_opener() {
 
 function choose_installation_mode() {
 	echo ""
-	if ask "Install ALL (Y) or enable interactive mode (n)?" Y; then
+	if ask "Do all steps automatically?" Y; then
 		return
 	else
 		INTERACTIVE_MODE=1
@@ -178,10 +178,12 @@ function choose_installation_configuration() {
 			q) exit 1 ;;
 		esac
 	done
+
+	choose_installation_mode
 }
 
 function execute_step() {
-	if [ ${INTERACTIVE_MODE} == "1" ] && !( ask "Continue (Y) or skip (n)?" Y ) ; then
+	if [ ${INTERACTIVE_MODE} == "1" ] && !( ask "Do this step?" Y ) ; then
 		echo "Skipping..."
 		return 1
 	fi
