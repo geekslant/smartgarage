@@ -24,16 +24,16 @@
 
     "platforms": [{
         "platform": "Camera-ffmpeg",
-	    "cameras": [{
-	        "name": "Garage Camera",
-    	    "videoConfig": {
-        		"source": "-re -i rtsp://admin:PUT_CAMERA_PASSWORD_HERE@PUT_CAMERA_IP_ADDRESS_HERE:554/stream=0",
-        		"maxStreams": 2,
-        		"maxWidth": 1280,
-        		"maxHeight": 720,
-        		"maxFPS": 30,
-        		"vcodec": "h264_omx"
+        "cameras": [{
+            "name": "Garage Camera",
+            "videoConfig": {
+                "source": "-re -i rtsp://admin:PUT_CAMERA_PASSWORD_HERE@PUT_CAMERA_IP_ADDRESS_HERE:554/stream=0",
+                "maxStreams": 2,
+                "maxWidth": 1280,
+                "maxHeight": 720,
+                "maxFPS": 30,
+                "vcodec": "h264_omx"
             }
-	   }]
+       }]
     }]
 }
