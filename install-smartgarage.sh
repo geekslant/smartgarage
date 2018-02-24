@@ -303,12 +303,12 @@ function configure_homebridge() {
 			cp ${DIR}/config-with-camera.json /var/lib/homebridge/config.json
 
 			echo ""
-			echo "sed -i 's/CAMERA_PASSWORD/${CAMERA_PASSWORD}' /var/lib/homebridge/config.json"
-			sed -i 's/CAMERA_PASSWORD/${CAMERA_PASSWORD}' /var/lib/homebridge/config.json
+			echo "sed -i \"s/PUT_CAMERA_PASSWORD_HERE/\"$CAMERA_PASSWORD\"/g\" \"/var/lib/homebridge/config.json\""
+			sed -i "s/PUT_CAMERA_PASSWORD_HERE/"$CAMERA_PASSWORD"/g" "/var/lib/homebridge/config.json"
 
 			echo ""
-			echo "sed -i 's/CAMERA_IP_ADDRESS/${CAMERA_IP_ADDRESS}' /var/lib/homebridge/config.json"
-			sed -i 's/CAMERA_IP_ADDRESS/${CAMERA_IP_ADDRESS}' /var/lib/homebridge/config.json
+			echo "sed -i \"s/PUT_CAMERA_IP_ADDRESS_HERE/\"$CAMERA_IP_ADDRESS\"/g\" \"/var/lib/homebridge/config.json\""
+			sed -i "s/PUT_CAMERA_IP_ADDRESS_HERE/"$CAMERA_IP_ADDRESS"/g" "/var/lib/homebridge/config.json"
 		fi
 
 		echo ""
