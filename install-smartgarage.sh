@@ -280,7 +280,7 @@ function configure_homebridge() {
 		echo "cp ${DIR}/homebridge /etc/default/"
 		cp ${DIR}/homebridge /etc/default/
 
-		echo "cp `${DIR}/homebridge.service /etc/systemd/system/"
+		echo "cp ${DIR}/homebridge.service /etc/systemd/system/"
 		cp ${DIR}/homebridge.service /etc/systemd/system/
 
 		echo "cp ${DIR}/garage-door-gpio /var/lib/homebridge/"
