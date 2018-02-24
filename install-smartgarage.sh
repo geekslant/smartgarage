@@ -48,6 +48,7 @@ fi
 CONFIGURE_CAMERA=0
 CAMERA_PASSWORD=""
 CAMERA_IP_ADDRESS=""
+INTERACTIVE_MODE=0
 TOTAL_PARTS=10
 
 function ask() {
@@ -125,6 +126,7 @@ function configure_opener_and_camera() {
 			read CAMERA_IP_ADDRESS </dev/tty
 			echo ""
 			if ask "Are you sure these are correct?"; then
+				echo ""
 				break
 			else
 				echo ""
@@ -138,8 +140,17 @@ function configure_opener_and_camera() {
 
 function configure_opener() {
 	echo ""
-	echo "Configuring Pi Smart Garage Door Opener Only..."
+	echo "Configuring Pi Smart Garage Door Opener only..."
 	echo ""
+}
+
+function choose_installation_mode() {
+	echo ""
+	if ask "Install ALL (Y) or enable interactive mode (n)?" Y; then
+		return
+	else
+		INTERACTIVE_MODE=1
+	fi
 }
 
 function choose_installation_configuration() {
@@ -169,58 +180,53 @@ function choose_installation_configuration() {
 	done
 }
 
+function execute_step() {
+	if [ ${INTERACTIVE_MODE} == "1" ] && !( ask "Continue (Y) or skip (n)?" Y ) ; then
+		echo "Skipping..."
+		return 1
+	fi
+}
+
 function update_package_database() {
 	infopart 1 "Updating package database..."
-	if ask "Continue (Y) or skip (n)?" Y; then
+	if execute_step ; then
 		apt-get update
-	else
-		echo "Skipping..."
 	fi
 }
 
 function upgrade_installed_packages() {
 	infopart 2 "Upgrading installed packages..."
-	if ask "Continue (Y) or skip (n)?" Y; then
+	if execute_step ; then
 		apt-get -y upgrade
-	else
-		echo "Skipping..."
 	fi
 }
 
 function install_node_repo() {
 	infopart 3 "Installing NodeSource Node.js v8.x repository..."
-	if ask "Continue (Y) or skip (n)?" Y; then
+	if execute_step ; then
 		curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-	else
-		echo "Skipping..."
 	fi
 }
 
 function install_nodejs_and_npm() {
 	infopart 4 "Installing Node.js and npm..."
-	if ask "Continue (Y) or skip (n)?" Y; then
+	if execute_step ; then
 		apt-get install -y nodejs
-	else
-		echo "Skipping..."
 	fi
 }
 
 function install_avahi() {
 	infopart 5 "Installing Avahi..."
-	if ask "Continue (Y) or skip (n)?" Y; then
+	if execute_step ; then
 		apt-get install -y libavahi-compat-libdnssd-dev
-	else
-		echo "Skipping..."
 	fi
 }
 
 function install_ffmpeg() {
 	if [ ${CONFIGURE_CAMERA} == "1" ]; then
 		infopart 6 "Installing ffmpeg..."
-		if ask "Continue (Y) or skip (n)?" Y; then
+		if execute_step ; then
 			apt-get install -y ffmpeg
-		else
-			echo "Skipping..."
 		fi
 	else
 		infopart 6 "No camera: Skipping ffmpeg installation..."
@@ -229,29 +235,23 @@ function install_ffmpeg() {
 
 function install_homebridge() {
 	infopart 7 "Installing Homebridge..."
-	if ask "Continue (Y) or skip (n)?" Y; then
+	if execute_step ; then
 		npm install -g --unsafe-perm homebridge
-	else
-		echo "Skipping..."
 	fi
 }
 
 function install_homebridge_garage_door_opener_plugin() {
 	infopart 8 "Installing Homebridge garage door opener plugin..."
-	if ask "Continue (Y) or skip (n)?" Y; then
+	if execute_step ; then
 		npm install -g homebridge-rasppi-gpio-garagedoor
-	else
-		echo "Skipping..."
 	fi
 }
 
 function install_homebridge_camera_plugin() {
 	if [ ${CONFIGURE_CAMERA} == "1" ]; then
 		infopart 9 "Installing Homebridge camera plugin..."
-		if ask "Continue (Y) or skip (n)?" Y; then
+		if execute_step ; then
 			npm install -g homebridge-camera-ffmpeg
-		else
-			echo "Skipping..."
 		fi
 	else
 		infopart 9 "No camera: Skipping Homebridge camera plugin installation..."
@@ -260,13 +260,11 @@ function install_homebridge_camera_plugin() {
 
 function configure_homebridge() {
 	infopart 10 "Configuring Homebridge..."
-	if ask "Continue (Y) or skip (n)?" Y; then
-		# TODO
+	if execute_step ; then
+		echo "TODO"
 		# config.json
 		# sed -i 's/CAMERA_PASSWORD/xxx' config.json"
 		# sed -i 's/CAMERA_IP_ADDRESS/xxx' config.json
-	else
-		echo "Skipping..."
 	fi
 }
 
