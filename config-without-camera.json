@@ -1,0 +1,26 @@
+{
+    "bridge": {
+        "name": "Geek Slant Smart Garage",
+        "username": "01:23:45:67:89:AB",
+        "port": 51826,
+        "pin": "123-45-678"
+    },
+
+    "description": "Homebridge configuration for the Geek Slant Smart Garage, as featured on https://youtube.com/geekslant and https://geekslant.com.",
+
+    "note":"Adjust doorOpensInSeconds to your garage door opener, and doorSwitchPressTimeInMs if necessary. Change the camera source RTSP link to use your password and IP address of your camera.",
+
+    "accessories": [{
+        "accessory": "RaspPiGPIOGarageDoor",
+        "name": "Garage Door",
+        "doorSwitchPin": 5,
+        "doorSwitchPressTimeInMs": 1500,
+        "doorSwitchValue": 1,
+        "closedDoorSensorPin": 20,
+        "closedDoorSensorValue": 1,
+        "doorPollInMs": 4000,
+        "doorOpensInSeconds": 12
+    }],
+
+    "platforms": []
+}
