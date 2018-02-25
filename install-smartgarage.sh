@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # https://github.com/geekslant/smartgarage/
-VERSION=v0.1
+version=v0.1
 
 # The MIT License (MIT)
 #
@@ -25,19 +25,6 @@ VERSION=v0.1
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-set -e
-
-function hashline() {
-	echo "###############################################################"
-}
-
-clear
-hashline
-echo " Geek Slant Smart Garage Installation Script "
-echo " ${VERSION}"
-hashline
-echo ""
-
 if [[ $EUID -ne 0 ]]; then
    echo "install-smartgarage must be run as root."
    echo "Try: sudo ./install-smartgarage"
@@ -45,12 +32,14 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-DIR=`dirname $0`
-SKIP_CAMERA=0
-CAMERA_PASSWORD=""
-CAMERA_IP_ADDRESS=""
-INTERACTIVE_MODE=0
-TOTAL_PARTS=10
+set -e
+
+dir=`dirname $0`
+skip_camera=0
+camera_password=""
+camera_ip_address=""
+interactive_mode=0
+total_parts=10
 
 function ask() {
     # https://djm.me/ask
@@ -100,17 +89,17 @@ function bail() {
     exit 1
 }
 
+function hashline() {
+	echo "###############################################################"
+}
+
 function infopart() {
 	echo ""
 	hashline
-	echo "Part ${1}/${TOTAL_PARTS}:"
+	echo "Part ${1}/${total_parts}:"
 	echo "${2}"
 	hashline
 	echo ""
-}
-
-function prompt_for_camera_password_and_ip_address() {
-	echo "prompt here"
 }
 
 function configure_opener_and_camera() {
@@ -121,12 +110,12 @@ function configure_opener_and_camera() {
 		echo ""
 		while true; do
 			echo -n "Camera password: "
-			read CAMERA_PASSWORD </dev/tty
+			read camera_password </dev/tty
 			echo -n "Camera IP address: "
-			read CAMERA_IP_ADDRESS </dev/tty
+			read camera_ip_address </dev/tty
 			echo ""
 			if ask "Are you sure these are correct?"; then
-				SKIP_CAMERA=0
+				skip_camera=0
 				echo ""
 				break
 			else
@@ -140,7 +129,7 @@ function configure_opener_and_camera() {
 }
 
 function configure_opener() {
-	SKIP_CAMERA=1
+	skip_camera=1
 	echo ""
 	echo "Configuring Pi Smart Garage Door Opener only..."
 	echo ""
@@ -151,7 +140,7 @@ function choose_installation_mode() {
 	if ask "Do all steps automatically?" Y; then
 		return
 	else
-		INTERACTIVE_MODE=1
+		interactive_mode=1
 	fi
 }
 
@@ -185,16 +174,19 @@ function choose_installation_configuration() {
 }
 
 function execute_step() {
-	if [ ${INTERACTIVE_MODE} == "1" ] && !( ask "Do this step?" Y ) ; then
+	if [ ${interactive_mode} == "1" ] && !( ask "Do this step?" Y ) ; then
+		echo ""
 		echo "Skipping..."
 		return 1
 	fi
+	echo ""
 }
 
 function update_package_database() {
 	infopart 1 "Updating package database..."
 	if execute_step ; then
-		echo "apt-get update"
+		echo "$ apt-get update"
+		echo ""
 		apt-get update
 	fi
 }
@@ -202,7 +194,8 @@ function update_package_database() {
 function upgrade_installed_packages() {
 	infopart 2 "Upgrading installed packages..."
 	if execute_step ; then
-		echo "apt-get -y upgrade"
+		echo "$ apt-get -y upgrade"
+		echo ""
 		apt-get -y upgrade
 	fi
 }
@@ -210,7 +203,8 @@ function upgrade_installed_packages() {
 function install_node_repo() {
 	infopart 3 "Installing NodeSource Node.js v8.x repository..."
 	if execute_step ; then
-		echo "curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -"
+		echo "$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -"
+		echo ""
 		curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 	fi
 }
@@ -218,7 +212,8 @@ function install_node_repo() {
 function install_nodejs_and_npm() {
 	infopart 4 "Installing Node.js and npm..."
 	if execute_step ; then
-		echo "apt-get install -y nodejs"
+		echo "$ apt-get install -y nodejs"
+		echo ""
 		apt-get install -y nodejs
 	fi
 }
@@ -226,19 +221,21 @@ function install_nodejs_and_npm() {
 function install_avahi() {
 	infopart 5 "Installing Avahi..."
 	if execute_step ; then
-		echo "apt-get install -y libavahi-compat-libdnssd-dev"
+		echo "$ apt-get install -y libavahi-compat-libdnssd-dev"
+		echo ""
 		apt-get install -y libavahi-compat-libdnssd-dev
 	fi
 }
 
 function install_ffmpeg() {
-	if [ ${SKIP_CAMERA} == "1" ]; then
+	if [ ${skip_camera} == "1" ]; then
 		infopart 6 "No camera: Skipping ffmpeg installation..."
 		return
 	fi
 	infopart 6 "Installing ffmpeg..."
 	if execute_step ; then
-		echo "apt-get install -y ffmpeg"
+		echo "$ apt-get install -y ffmpeg"
+		echo ""
 		apt-get install -y ffmpeg
 	fi
 }
@@ -246,7 +243,8 @@ function install_ffmpeg() {
 function install_homebridge() {
 	infopart 7 "Installing Homebridge..."
 	if execute_step ; then
-		echo "npm install -g --unsafe-perm homebridge"
+		echo "$ npm install -g --unsafe-perm homebridge"
+		echo ""
 		npm install -g --unsafe-perm homebridge
 	fi
 }
@@ -254,19 +252,21 @@ function install_homebridge() {
 function install_homebridge_garage_door_opener_plugin() {
 	infopart 8 "Installing Homebridge garage door opener plugin..."
 	if execute_step ; then
-		echo "npm install -g homebridge-rasppi-gpio-garagedoor"
+		echo "$ npm install -g homebridge-rasppi-gpio-garagedoor"
+		echo ""
 		npm install -g homebridge-rasppi-gpio-garagedoor
 	fi
 }
 
 function install_homebridge_camera_plugin() {
-	if [ ${SKIP_CAMERA} == "1" ]; then
+	if [ ${skip_camera} == "1" ]; then
 		infopart 9 "No camera: Skipping Homebridge camera plugin installation..."
 		return
 	fi
 	infopart 9 "Installing Homebridge camera plugin..."
 	if execute_step ; then
-		echo "npm install -g homebridge-camera-ffmpeg"
+		echo "$ npm install -g homebridge-camera-ffmpeg"
+		echo ""
 		npm install -g homebridge-camera-ffmpeg
 	fi
 }
@@ -276,70 +276,105 @@ function configure_homebridge() {
 	if execute_step ; then
 		echo ""
 		if !([[ -d /var/lib/homebridge ]]) ; then
-			echo "mkdir /var/lib/homebridge"
+			echo "Creating /var/lib/homebridge directory..."
+			echo "$ mkdir /var/lib/homebridge"
+			echo ""
 			mkdir /var/lib/homebridge
 		else
-			echo "/var/lib/homebridge already exists. Skipping mkdir."
+			echo "/var/lib/homebridge directory already exists. Skipping mkdir."
 		fi
 
 		echo ""
-		echo "cp ${DIR}/homebridge /etc/default/"
-		cp ${DIR}/homebridge /etc/default/
+		echo "Copying homebridge service defaults..."
+		echo "$ cp ${dir}/homebridge /etc/default/"
+		echo ""
+		cp ${dir}/homebridge /etc/default/
 
 		echo ""
-		echo "cp ${DIR}/homebridge.service /etc/systemd/system/"
-		cp ${DIR}/homebridge.service /etc/systemd/system/
+		echo "Copying homebridge service configuration..."
+		echo "$ cp ${dir}/homebridge.service /etc/systemd/system/"
+		echo ""
+		cp ${dir}/homebridge.service /etc/systemd/system/
 
 		echo ""
-		echo "cp ${DIR}/garage-door-gpio /var/lib/homebridge/"
-		cp ${DIR}/garage-door-gpio /var/lib/homebridge/
+		echo "Copying script that enables Pi GPIO pins for the garage door opener..."
+		echo "$ cp ${dir}/garage-door-gpio /var/lib/homebridge/"
+		echo ""
+		cp ${dir}/garage-door-gpio /var/lib/homebridge/
 
 		echo ""
-		if [ ${SKIP_CAMERA} == "1" ]; then
-			echo "cp ${DIR}/config-without-camera.json /var/lib/homebridge/config.json"
-			cp ${DIR}/config-without-camera.json /var/lib/homebridge/config.json
+		if [ ${skip_camera} == "1" ]; then
+			echo "Copying Homebridge configuration..."
+			echo "$ cp ${dir}/config-without-camera.json /var/lib/homebridge/config.json"
+			echo ""
+			cp ${dir}/config-without-camera.json /var/lib/homebridge/config.json
 		else
-			echo "cp ${DIR}/config-with-camera.json /var/lib/homebridge/config.json"
-			cp ${DIR}/config-with-camera.json /var/lib/homebridge/config.json
+			echo "Copying Homebridge configuration with camera settings..."
+			echo "$ cp ${dir}/config-with-camera.json /var/lib/homebridge/config.json"
+			echo ""
+			cp ${dir}/config-with-camera.json /var/lib/homebridge/config.json
 
 			echo ""
-			echo "sed -i \"s/PUT_CAMERA_PASSWORD_HERE/\"$CAMERA_PASSWORD\"/g\" \"/var/lib/homebridge/config.json\""
-			sed -i "s/PUT_CAMERA_PASSWORD_HERE/"$CAMERA_PASSWORD"/g" "/var/lib/homebridge/config.json"
+			echo "Inserting camera password in Homebridge configuration..."
+			echo "$ sed -i \"s/PUT_CAMERA_PASSWORD_HERE/\"$camera_password\"/g\" \"/var/lib/homebridge/config.json\""
+			echo ""
+			sed -i "s/PUT_CAMERA_PASSWORD_HERE/"$camera_password"/g" "/var/lib/homebridge/config.json"
 
 			echo ""
-			echo "sed -i \"s/PUT_CAMERA_IP_ADDRESS_HERE/\"$CAMERA_IP_ADDRESS\"/g\" \"/var/lib/homebridge/config.json\""
-			sed -i "s/PUT_CAMERA_IP_ADDRESS_HERE/"$CAMERA_IP_ADDRESS"/g" "/var/lib/homebridge/config.json"
+			echo "Inserting camera IP address in Homebridge configuration..."
+			echo "$ sed -i \"s/PUT_CAMERA_IP_ADDRESS_HERE/\"$camera_ip_address\"/g\" \"/var/lib/homebridge/config.json\""
+			echo ""
+			sed -i "s/PUT_CAMERA_IP_ADDRESS_HERE/"$camera_ip_address"/g" "/var/lib/homebridge/config.json"
 		fi
 
 		echo ""
 		if [ id -u homebridge &>/dev/null ]; then
-			echo "useradd -M --system homebridge"
+			echo "Adding homebridge system user..."
+			echo "$ useradd -M --system homebridge"
+			echo ""
 			useradd -M --system homebridge
 		else
 			echo "homebridge user already exists. Skipping useradd."
 		fi
 
 		echo ""
-		echo "chmod -R 0777 /var/lib/homebridge"
+		echo "Modifying permissions for the /var/lib/homebridge directory..."
+		echo "$ chmod -R 0777 /var/lib/homebridge"
+		echo ""
 		chmod -R 0777 /var/lib/homebridge
 
 		echo ""
-		echo "systemctl daemon-reload"
+		echo "Reloading the systemd manager configuration..."
+		echo "$ systemctl daemon-reload"
+		echo ""
 		systemctl daemon-reload
 
 		echo ""
-		echo "systemctl enable homebridge"
+		echo "Enabling the homebridge service..."
+		echo "$ systemctl enable homebridge"
+		echo ""
 		systemctl enable homebridge
 
 		echo ""
-		echo "systemctl start homebridge"
+		echo "Starting the homebridge service..."
+		echo "$ systemctl start homebridge"
+		echo ""
 		systemctl start homebridge
 
 		echo ""
-		echo "systemctl status homebridge"
+		echo "Checking the status of the homebridge service..."
+		echo "$ systemctl status homebridge"
+		echo ""
 		systemctl status homebridge
 	fi
 }
+
+clear
+hashline
+echo " Geek Slant Smart Garage Installation Script "
+echo " ${version}"
+hashline
+echo ""
 
 choose_installation_configuration
 
@@ -361,7 +396,7 @@ install_homebridge_garage_door_opener_plugin || bail "Failed to install Homebrid
 
 install_homebridge_camera_plugin || bail "Failed to install Homebridge camera plugin."
 
-configure_homebridge
+configure_homebridge || bail "Failed to configure Homebridge."
 
 echo ""
 hashline
