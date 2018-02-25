@@ -34,6 +34,9 @@ fi
 
 set -e
 
+SECONDS=0
+previous_part_elapsed_time=0
+total_elapsed_time=0
 dir=`dirname $0`
 skip_camera=0
 camera_password=""
@@ -86,7 +89,32 @@ function bail() {
     else
         echo "Exiting due to error: $*"
     fi
+    stop_timer
+    show_elapsed_time
     exit 1
+}
+
+function start_timer() {
+	SECONDS=0
+}
+
+function stop_timer() {
+	previous_part_elapsed_time=$SECONDS
+	let "total_elapsed_time=total_elapsed_time+previous_part_elapsed_time"
+}
+
+function show_elapsed_time() {
+	let "previous_part_elapsed_time_minutes=previous_part_elapsed_time/60"
+	let "previous_part_elapsed_time_seconds=previous_part_elapsed_time%60"
+	let "total_elapsed_time_minutes=total_elapsed_time/60"
+	let "total_elapsed_time_seconds=total_elapsed_time%60"
+	echo ""
+	if [ -z "$1" ]; then
+		echo -n "Part Elapsed Time: "
+	else
+		echo -n "Part $1 Elapsed Time: "
+	fi
+	printf "%02d:%02d\nTotal Elapsed Time: %02d:%02d\n" $previous_part_elapsed_time_minutes $previous_part_elapsed_time_seconds $total_elapsed_time_minutes $total_elapsed_time_seconds
 }
 
 function hashline() {
@@ -94,6 +122,9 @@ function hashline() {
 }
 
 function infopart() {
+	stop_timer
+	let "previous_part=$1-1"
+	show_elapsed_time $previous_part
 	echo ""
 	hashline
 	echo "Part ${1}/${total_parts}:"
@@ -146,6 +177,7 @@ function choose_installation_mode() {
 
 function choose_installation_configuration() {
 	local reply
+	start_timer
 
 	echo "Choose an installation configuration:"
 	echo ""
@@ -177,9 +209,11 @@ function execute_step() {
 	if [ ${interactive_mode} == "1" ] && !( ask "Do this step?" Y ) ; then
 		echo ""
 		echo "Skipping..."
+		start_timer
 		return 1
 	fi
 	echo ""
+	start_timer
 }
 
 function update_package_database() {
@@ -367,6 +401,8 @@ function configure_homebridge() {
 		echo ""
 		systemctl status homebridge
 	fi
+	stop_timer
+	show_elapsed_time 10
 }
 
 clear
