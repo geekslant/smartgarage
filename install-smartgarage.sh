@@ -246,9 +246,9 @@ function install_node_repo() {
 function install_nodejs_and_npm() {
 	infopart 4 "Installing Node.js and npm..."
 	if execute_step ; then
-		echo "$ apt-get install -y nodejs"
+		echo "$ apt-get install -y nodejs npm"
 		echo ""
-		apt-get install -y nodejs
+		apt-get install -y nodejs npm
 	fi
 }
 
